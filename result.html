@@ -1,0 +1,106 @@
+<?php
+
+// クエリパラメータ
+$t = "1";
+if (isset($_GET["t"])) {
+	$t = $_GET["t"];
+}
+
+require_once(dirname(__FILE__)."/cms/dblogic/themelogic.php");
+$themeLogic = new ThemeLogic();
+// 現在選択されているテーマを取得
+$theme = $themeLogic->selectTheme($t);
+unset($themeLogic);
+
+require_once(dirname(__FILE__)."/cms/dblogic/candidatelogic.php");
+$candidateLogic = new CandidateLogic();
+// 候補
+$candidates = $candidateLogic->selectResult($t);
+$candidatesCnt = 0;
+if (is_array($candidates)){
+	$candidatesCnt = count($candidates);
+}
+unset($candidateLogic);
+
+require_once(dirname(__FILE__)."/cms/dblogic/votelogic.php");
+$voteLogic = new VoteLogic();
+// 得票総計
+$voteCnt = $voteLogic->selectVoteCountForResul($t);
+unset($voteLogic);
+
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<title>poll</title>
+</head>
+<body>
+
+<nav class="navbar sticky-top  navbar-dark bg-dark">
+  <!-- Navbar content -->
+  <a class="navbar-brand" href="#">みんなの投票</a>
+</nav>
+
+<div class="container">
+  <div class="row">
+	<div class="col-lg-3 bg-light text-dark">
+	  <h2></h2>
+	</div>
+	<div class="col-lg-9">
+	  <h3><?php echo $theme['theme_name']?></h3>
+	  <div class="text-right"><a href="index.html?t=<?php echo $t?>">戻る</a></div>
+		<table class="table">
+		<tbody>
+
+<?php
+if ($candidatesCnt > 0) {
+	$rank = 1;
+	for ($i = 0; $i < $candidatesCnt; $i++) {
+		$wk = $candidates[$i];
+		$valuenow = round(($wk['cnt']/$voteCnt)*100);
+?>
+			<tr>
+				<th style="width:1rem;"scope="row"><?php echo ($i == 0 or $candidates[$i-1]['cnt'] > $wk['cnt'])?$rank:"" ?></th>
+				<td style="width:64px;">
+					<a data-toggle="modal" data-target="#modalImg" data-imgtitle="<?php echo $wk['candidate_name']?>" data-imgurl="<?php echo $wk['candidate_img']?>">
+						<img src="<?php echo $wk['candidate_img']?>" style="width:64px;">
+					</a>
+				</td>
+				<td><?php echo $wk['candidate_name']?></td>
+				<td style="width:50%"><div class="progress"><span class="progress-bar" style="width: <?php echo $valuenow?>%" role="progressbar" aria-valuenow="<?php echo $valuenow?>" aria-valuemin="0" aria-valuemax="100"><?php echo $wk['cnt']?>票</div>
+</span></div></td>
+			</tr>
+<?php
+		$rank++;
+	}
+}
+?>
+
+		</table>
+	</div>
+  </div>
+</div>
+
+<footer class="bg-dark text-white">
+	<p class="m-0 text-center">
+		<a class="text-white" href="https://hacka.work/blog/">hacka.work</a>
+	</p>
+</footer>
+
+<?php include(dirname(__FILE__)."/modal-img.php"); ?>
+
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="js/jquery-3.4.1.min.js" integrity="sha384-vk5WoKIaW/vJyUAd9n/wmopsmNhiy+L2Z+SBxGYnUkunIxVxAv/UtMOhba/xskxh"></script>
+<!-- Production version -->
+<!-- <script src="https://unpkg.com/@popperjs/core@2"></script> -->
+<script src="js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm"></script>
+<script src="js/modal.js"></script>
+</body>
+</html>
