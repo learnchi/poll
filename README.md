@@ -16,7 +16,8 @@ DBのバージョン： 10.1.37-MariaDB
 
 # データベースの準備
 
-`/doc/poll_db.sql`を実行してください。
+1. `/doc/poll_db.sql`を実行してください。
+2. `/cms/util/dbconfig.ini`に接続情報を記入してください。
 
 # 投票の設定追加
 
